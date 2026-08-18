@@ -779,3 +779,66 @@
 
 </body>
 </html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Добавление записей в Firebase</title>
+</head>
+<body>
+
+    <h3>Добавить новую запись в базу</h3>
+    <input type="text" id="userInput" placeholder="Введите любой текст..." style="padding: 8px; width: 250px;">
+    <button id="addBtn" style="padding: 8px 15px; cursor: pointer;">Добавить</button>
+
+    <!-- Сюда будет выводиться статус отправки или ошибка -->
+    <p id="status" style="font-weight: bold; color: blue;">Статус: Ожидание ввода</p>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+      // Обратите внимание: мы импортируем функцию 'push' для добавления НОВЫХ записей в список
+      import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+      const firebaseConfig = {
+        databaseURL: "https://orls2-b8461-default-rtdb.europe-west1.firebasedatabase.app"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getDatabase(app);
+
+      const addBtn = document.getElementById('addBtn');
+      const userInput = document.getElementById('userInput');
+      const statusText = document.getElementById('status');
+
+      addBtn.addEventListener('click', () => {
+        const textValue = userInput.value.trim();
+
+        if (textValue === "") {
+          statusText.innerText = "⚠️ Пожалуйста, введите текст!";
+          statusText.style.color = "orange";
+          return;
+        }
+
+        statusText.innerText = "Отправка в облако...";
+        statusText.style.color = "blue";
+
+        // Функция 'push' добавляет новую уникальную запись в ветку 'my_records'
+        push(ref(db, 'my_records'), {
+          text: textValue,
+          timestamp: new Date().toLocaleString()
+        })
+        .then(() => {
+          statusText.innerText = "✅ Запись успешно добавлена!";
+          statusText.style.color = "green";
+          userInput.value = ""; // Очищаем поле ввода
+        })
+        .catch((error) => {
+          // Если возникнет ошибка доступа или сети, она выведется прямо на экран!
+          statusText.innerText = `❌ Ошибка: ${error.message}`;
+          statusText.style.color = "red";
+          console.error(error);
+        });
+      });
+    </script>
+
+</body>
+</html>
