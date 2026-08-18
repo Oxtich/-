@@ -60,7 +60,7 @@
 
         .form-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 15px;
             margin-bottom: 20px;
         }
@@ -151,6 +151,16 @@
             margin-bottom: 4px;
         }
 
+        .emp-id-badge {
+            font-size: 0.85rem;
+            color: #718096;
+            font-weight: normal;
+            background: #edf2f7;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-right: 5px;
+        }
+
         .rank-badge {
             display: inline-block;
             padding: 4px 10px;
@@ -200,6 +210,9 @@
 
         .btn-edit { background-color: #edf2f7; color: #4a5568; }
         .btn-edit:hover { background-color: #e2e8f0; }
+        
+        .btn-delete { background-color: #fff5f5; color: #e53e3e; border: 1px solid #fed7d7; }
+        .btn-delete:hover { background-color: #fed7d7; }
 
         /* Логи и история */
         .history-box {
@@ -272,6 +285,10 @@
     <div class="form-box">
         <div class="form-grid">
             <div class="form-group">
+                <label>ID сотрудника</label>
+                <input type="text" id="empId" placeholder="Например: 1024">
+            </div>
+            <div class="form-group">
                 <label>Фамилия</label>
                 <input type="text" id="lastName" placeholder="Иванов">
             </div>
@@ -321,8 +338,8 @@
 </div>
 
 <script>
-    // Массив сотрудников
-    let employees = [];
+    // Загрузка массива сотрудников из LocalStorage или создание пустого
+    let employees = JSON.parse(localStorage.getItem('uvd_employees')) || [];
     let currentEmployeeId = null;
 
     // Справка по рангам для сортировки и названий
@@ -334,19 +351,33 @@
         'trainee': { order: 5, text: 'Стажер', class: 'rank-trainee' }
     };
 
+    // Сохранение данных в память браузера
+    function saveData() {
+        localStorage.setItem('uvd_employees', JSON.stringify(employees));
+    }
+
     // Функция добавления сотрудника
     function addEmployee() {
+        const empId = document.getElementById('empId').value.trim();
         const lastName = document.getElementById('lastName').value.trim();
         const firstName = document.getElementById('firstName').value.trim();
         const position = document.getElementById('position').value;
 
-        if (!lastName || !firstName) {
-            alert('Пожалуйста, заполните Фамилию и Имя!');
+        if (!empId || !lastName || !firstName) {
+            alert('Пожалуйста, заполните все поля (ID, Фамилию и Имя)!');
+            return;
+        }
+
+        // Проверка на уникальность ID
+        const idExists = employees.some(e => e.customId === empId);
+        if (idExists) {
+            alert('Сотрудник с таким ID уже существует!');
             return;
         }
 
         const newEmployee = {
-            id: Date.now(),
+            id: Date.now(), // уникальный внутренний ключ для JS
+            customId: empId, // пользовательский ID
             lastName: lastName,
             firstName: firstName,
             position: position,
@@ -358,10 +389,12 @@
         employees.push(newEmployee);
         
         // Сброс формы
+        document.getElementById('empId').value = '';
         document.getElementById('lastName').value = '';
         document.getElementById('firstName').value = '';
         document.getElementById('position').value = 'chief';
 
+        saveData();
         updateUI();
     }
 
@@ -382,8 +415,13 @@
                 // Если карточка в режиме редактирования
                 card.innerHTML = `
                     <div class="edit-fields">
-                        <input type="text" id="editLast-${emp.id}" value="${emp.lastName}" placeholder="Фамилия">
-                        <input type="text" id="editFirst-${emp.id}" value="${emp.firstName}" placeholder="Имя">
+                        <label style="font-size:0.8rem; font-weight:bold;">ID сотрудника:</label>
+                        <input type="text" id="editId-${emp.id}" value="${emp.customId || ''}">
+                        <label style="font-size:0.8rem; font-weight:bold;">Фамилия:</label>
+                        <input type="text" id="editLast-${emp.id}" value="${emp.lastName}">
+                        <label style="font-size:0.8rem; font-weight:bold;">Имя:</label>
+                        <input type="text" id="editFirst-${emp.id}" value="${emp.firstName}">
+                        <label style="font-size:0.8rem; font-weight:bold;">Должность:</label>
                         <select id="editPos-${emp.id}">
                             <option value="chief" ${emp.position === 'chief' ? 'selected' : ''}>Начальник</option>
                             <option value="deputy" ${emp.position === 'deputy' ? 'selected' : ''}>Зам начальника</option>
@@ -400,7 +438,7 @@
             } else {
                 // Обычный вид карточки
                 let historyHTML = '';
-                if (emp.history.length > 0) {
+                if (emp.history && emp.history.length > 0) {
                     historyHTML = `
                         <div class="history-box">
                             <div class="history-title">История баллов:</div>
@@ -414,7 +452,7 @@
                 card.innerHTML = `
                     <div class="card-header">
                         <div class="info-block">
-                            <h3>${emp.lastName} ${emp.firstName}</h3>
+                            <h3><span class="emp-id-badge">ID: ${emp.customId || '—'}</span>${emp.lastName} ${emp.firstName}</h3>
                             <span class="rank-badge">${config.text}</span>
                         </div>
                         <div class="score-box">
@@ -427,6 +465,7 @@
                         <button class="btn btn-score-up btn-small" onclick="openScoreModal(${emp.id})">⭐ Начислить баллы</button>
                         <button class="btn btn-score-down btn-small" onclick="finePoints(${emp.id})">⚠ Списать 5 б.</button>
                         <button class="btn btn-edit btn-small" onclick="toggleEdit(${emp.id})">✏ Редактировать</button>
+                        <button class="btn btn-delete btn-small" onclick="deleteEmployee(${emp.id})">🗑 Удалить</button>
                     </div>
                 `;
             }
@@ -447,19 +486,39 @@
     function saveEdit(id) {
         const emp = employees.find(e => e.id === id);
         if (emp) {
+            const newId = document.getElementById(`editId-${id}`).value.trim();
             const newLast = document.getElementById(`editLast-${id}`).value.trim();
             const newFirst = document.getElementById(`editFirst-${id}`).value.trim();
             const newPos = document.getElementById(`editPos-${id}`).value;
 
-            if (!newLast || !newFirst) {
-                alert('Поля не должны быть пустыми!');
+            if (!newId || !newLast || !newFirst) {
+                alert('Все поля должны быть заполнены!');
                 return;
             }
 
+            // Проверка на уникальность ID среди других сотрудников
+            const idExists = employees.some(e => e.id !== id && e.customId === newId);
+            if (idExists) {
+                alert('Этот ID уже занят другим сотрудником!');
+                return;
+            }
+
+            emp.customId = newId;
             emp.lastName = newLast;
             emp.firstName = newFirst;
             emp.position = newPos;
             emp.isEditing = false;
+            
+            saveData();
+            updateUI();
+        }
+    }
+
+    // Удаление сотрудника
+    function deleteEmployee(id) {
+        if (confirm('Вы уверены, что хотите удалить этого сотрудника?')) {
+            employees = employees.filter(e => e.id !== id);
+            saveData();
             updateUI();
         }
     }
@@ -468,7 +527,7 @@
     function openScoreModal(id) {
         currentEmployeeId = id;
         const emp = employees.find(e => e.id === id);
-        document.getElementById('modalEmployeeName').innerText = `Начисление: ${emp.lastName} ${emp.firstName}`;
+        document.getElementById('modalEmployeeName').innerText = `Начисление: [ID: ${emp.customId}] ${emp.lastName} ${emp.firstName}`;
         document.getElementById('scoreModal').style.display = 'flex';
     }
 
@@ -483,12 +542,15 @@
         const emp = employees.find(e => e.id === currentEmployeeId);
         const taskSelect = document.getElementById('taskSelect');
         const selectedText = taskSelect.options[taskSelect.selectedIndex].text;
-        const points = parseInt(taskSelect.value) || 10;
+        const points = parseInt(taskSelect.value) || 0;
 
         if (emp) {
             emp.score += points;
-            emp.history.push(`+${points} б. за: ${selectedText.replace(/\(\+\d+ б\.\)/, '')}`);
+            if (!emp.history) emp.history = [];
+            emp.history.push(`+${points} б. за: ${selectedText}`);
+            
             closeModal();
+            saveData();
             updateUI();
         }
     }
@@ -498,10 +560,16 @@
         const emp = employees.find(e => e.id === id);
         if (emp) {
             emp.score = Math.max(0, emp.score - 5);
+            if (!emp.history) emp.history = [];
             emp.history.push(`-5 б. (Взыскание/Корректировка)`);
+            
+            saveData();
             updateUI();
         }
     }
+
+    // Первичная отрисовка при загрузке страницы
+    updateUI();
 </script>
 
 </body>
