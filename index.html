@@ -497,17 +497,28 @@
 </div>
 
 <script type="module">
-    import { initializeApp } from "https://orls2-b8461-default-rtdb.europe-west1.firebasedatabase.app";
+  // 1. ИСПРАВЛЕНО: Теперь initializeApp импортируется из библиотеки, а не из адреса БД
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+  
+  // 2. Импортируем функции для работы с базой данных
   import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-  // Официальная интеграция вашей ссылки
+  // 3. Конфигурация с адресом конкретно вашей базы данных
   const firebaseConfig = {
-    databaseURL: "https://orls2-b8461-default-rtdb.europe-west1.firebasedatabase.app/"
+    databaseURL: "https://orls2-b8461-default-rtdb.europe-west1.firebasedatabase.app"
   };
 
+  // 4. Инициализируем приложение и подключаем вашу базу данных
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
+  // --- Пример использования вашей БД ---
+  
+  // Функция для записи данных (например, в путь 'users/user1')
+  // set(ref(db, 'users/user1'), {
+  //   username: "Иван",
+  //   status: "активен"
+  // });
     let employees = [];
     let currentEmployeeId = null;
     let totalBudget = 30000000;
