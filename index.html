@@ -236,7 +236,6 @@
             box-shadow: 0 6px 15px rgba(0,0,0,0.3);
         }
 
-        /* Привязка цветов рангов к карточкам */
         .rank-chief { --card-rank-color: var(--rank-chief); }
         .rank-deputy { --card-rank-color: var(--rank-deputy); }
         .rank-sr-instr { --card-rank-color: var(--rank-sr-instr); }
@@ -292,7 +291,6 @@
             width: max-content;
         }
 
-        /* Блоки с цифрами */
         .stats-wrapper {
             display: flex;
             gap: 15px;
@@ -323,7 +321,6 @@
         .value-points { color: #38a169; }
         .value-money { color: var(--text-gold); }
 
-        /* Логи / История */
         .history-box {
             margin-top: 15px;
             font-size: 0.8rem;
@@ -352,7 +349,6 @@
             border-bottom: 1px solid rgba(255,255,255,0.02);
         }
 
-        /* Кнопки действий */
         .actions {
             display: flex;
             gap: 8px;
@@ -378,7 +374,6 @@
         .btn-delete { background-color: #742a2a; color: #fc8181; margin-left: auto; }
         .btn-delete:hover { background-color: #9b2c2c; }
 
-        /* Модалка начисления баллов */
         .modal {
             display: none;
             position: fixed;
@@ -420,7 +415,6 @@
             gap: 10px;
         }
 
-        /* Редактирование */
         .edit-fields {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -447,7 +441,7 @@
             <span style="font-weight: 800; color: var(--text-gold);">₽</span>
         </div>
         <div class="budget-stats" id="budgetStatsText">
-            Загрузка данных...
+            Загрузка базы данных...
         </div>
     </div>
 
@@ -502,17 +496,9 @@
     </div>
 </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
-
-    // Конфигурация с вашей ссылкой на Realtime Database
-    const firebaseConfig = {
-        databaseURL: "https://orls-bab57-default-rtdb.europe-west1.firebasedatabase.app/"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+<script>
+    // Прямое и надежное REST-подключение к Firebase через fetch
+    const firebaseUrl = "https://orls-bab57-default-rtdb.europe-west1.firebasedatabase.app/uvd_database.json";
 
     let employees = [];
     let currentEmployeeId = null;
@@ -526,34 +512,50 @@
         'trainee': { order: 5, text: 'Стажер', class: 'rank-trainee' }
     };
 
-    // Слушаем изменения в базе Firebase в реальном времени
-    onValue(ref(db, 'uvd_data'), (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-            employees = data.employees || [];
-            totalBudget = data.totalBudget || 30000000;
-            document.getElementById('totalBudgetInput').value = totalBudget;
-        } else {
-            employees = [];
-            totalBudget = 30000000;
+    // Загрузка данных из облака
+    async function loadFromFirebase() {
+        try {
+            const response = await fetch(firebaseUrl);
+            const data = await response.json();
+            if (data) {
+                employees = data.employees || [];
+                totalBudget = data.totalBudget || 30000000;
+                document.getElementById('totalBudgetInput').value = totalBudget;
+            }
+            updateUI();
+        } catch (error) {
+            console.error("Ошибка загрузки:", error);
+            document.getElementById('budgetStatsText').innerText = "Ошибка сети с базой";
         }
-        updateUI();
-    });
-
-    function saveToFirebase() {
-        set(ref(db, 'uvd_data'), {
-            employees: employees,
-            totalBudget: totalBudget
-        });
     }
 
-    window.changeBudget = function() {
+    // Сохранение в облако
+    async function saveToFirebase() {
+        try {
+            await fetch(firebaseUrl, {
+                method: "PUT",
+                body: JSON.stringify({ employees, totalBudget })
+            });
+            updateUI();
+        } catch (error) {
+            console.error("Ошибка сохранения:", error);
+            alert("Не удалось отправить данные в облако!");
+        }
+    }
+
+    // Запускаем постоянное обновление каждые 3 секунды для синхронизации ПК
+    window.onload = function() {
+        loadFromFirebase();
+        setInterval(loadFromFirebase, 3000);
+    };
+
+    function changeBudget() {
         const val = parseInt(document.getElementById('totalBudgetInput').value);
         totalBudget = isNaN(val) || val < 0 ? 0 : val;
         saveToFirebase();
     }
 
-    window.addEmployee = function() {
+    function addEmployee() {
         const empId = document.getElementById('empId').value.trim();
         const lastName = document.getElementById('lastName').value.trim();
         const firstName = document.getElementById('firstName').value.trim();
@@ -593,6 +595,7 @@
 
     function updateUI() {
         const listContainer = document.getElementById('employeeList');
+        if (!listContainer) return;
         listContainer.innerHTML = '';
 
         const totalPoints = employees.reduce((sum, emp) => sum + emp.score, 0);
@@ -625,8 +628,8 @@
                         </select>
                     </div>
                     <div class="actions">
-                        <button class="btn btn-score-up btn-small" id="btnSave-${emp.id}">💾 Сохранить</button>
-                        <button class="btn btn-edit btn-small" id="btnCancel-${emp.id}">Отмена</button>
+                        <button class="btn btn-score-up btn-small" onclick="saveEdit(${emp.id})">💾 Сохранить</button>
+                        <button class="btn btn-edit btn-small" onclick="toggleEdit(${emp.id})">Отмена</button>
                     </div>
                 `;
             } else {
@@ -664,26 +667,15 @@
                     </div>
                     ${historyHTML}
                     <div class="actions">
-                        <button class="btn btn-score-up btn-small" id="btnScore-${emp.id}">⭐ Зачесть работу</button>
-                        <button class="btn btn-score-down btn-small" id="btnFine-${emp.id}">⚠ Выговор (-5 б.)</button>
-                        <button class="btn btn-edit btn-small" id="btnEdit-${emp.id}">✏ Править</button>
-                        <button class="btn btn-delete btn-small" id="btnDel-${emp.id}">🗑 Комиссовать</button>
+                        <button class="btn btn-score-up btn-small" onclick="openScoreModal(${emp.id})">⭐ Зачесть работу</button>
+                        <button class="btn btn-score-down btn-small" onclick="finePoints(${emp.id})">⚠ Выговор (-5 б.)</button>
+                        <button class="btn btn-edit btn-small" onclick="toggleEdit(${emp.id})">✏ Править</button>
+                        <button class="btn btn-delete btn-small" onclick="deleteEmployee(${emp.id})">🗑 Комиссовать</button>
                     </div>
                 `;
             }
 
             listContainer.appendChild(card);
-
-            // Навешиваем обработчики событий после отрисовки
-            if (emp.isEditing) {
-                document.getElementById(`btnSave-${emp.id}`).onclick = () => saveEdit(emp.id);
-                document.getElementById(`btnCancel-${emp.id}`).onclick = () => toggleEdit(emp.id);
-            } else {
-                document.getElementById(`btnScore-${emp.id}`).onclick = () => openScoreModal(emp.id);
-                document.getElementById(`btnFine-${emp.id}`).onclick = () => finePoints(emp.id);
-                document.getElementById(`btnEdit-${emp.id}`).onclick = () => toggleEdit(emp.id);
-                document.getElementById(`btnDel-${emp.id}`).onclick = () => deleteEmployee(emp.id);
-            }
         });
     }
 
@@ -737,12 +729,12 @@
         document.getElementById('scoreModal').style.display = 'flex';
     }
 
-    window.closeModal = function() {
+    function closeModal() {
         document.getElementById('scoreModal').style.display = 'none';
         currentEmployeeId = null;
     }
 
-    window.applyPoints = function() {
+    function applyPoints() {
         if (!currentEmployeeId) return;
         
         const emp = employees.find(e => e.id === currentEmployeeId);
