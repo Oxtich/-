@@ -491,14 +491,22 @@
         </div>
         <div class="modal-buttons">
             <button class="btn btn-edit btn-small" onclick="closeModal()">Отмена</button>
-            <button class="btn btn-score-up btn-small" onclick="applyPoints()">Утвердить и начислить</button>
+            <button class="btn btn-score-up btn-small" id="btnSubmitPoints">Утвердить и начислить</button>
         </div>
     </div>
 </div>
 
-<script>
-    // Прямое и надежное REST-подключение к Firebase через fetch
-    const firebaseUrl = "https://orls-bab57-default-rtdb.europe-west1.firebasedatabase.app/uvd_database.json";
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+    // Официальная интеграция вашей ссылки
+    const firebaseConfig = {
+        databaseURL: "https://orls-bab57-default-rtdb.europe-west1.firebasedatabase.app/"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
     let employees = [];
     let currentEmployeeId = null;
@@ -512,50 +520,37 @@
         'trainee': { order: 5, text: 'Стажер', class: 'rank-trainee' }
     };
 
-    // Загрузка данных из облака
-    async function loadFromFirebase() {
-        try {
-            const response = await fetch(firebaseUrl);
-            const data = await response.json();
-            if (data) {
-                employees = data.employees || [];
-                totalBudget = data.totalBudget || 30000000;
-                document.getElementById('totalBudgetInput').value = totalBudget;
-            }
-            updateUI();
-        } catch (error) {
-            console.error("Ошибка загрузки:", error);
-            document.getElementById('budgetStatsText').innerText = "Ошибка сети с базой";
+    // Настоящее прослушивание SDK от Google (пробивает CORS-блокировки)
+    onValue(ref(db, 'uvd_data'), (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            employees = data.employees || [];
+            totalBudget = data.totalBudget || 30000000;
+            document.getElementById('totalBudgetInput').value = totalBudget;
+        } else {
+            employees = [];
+            totalBudget = 30000000;
         }
+        updateUI();
+    }, (error) => {
+        console.error("Ошибка Firebase:", error);
+        document.getElementById('budgetStatsText').innerText = "Ошибка соединения с облаком";
+    });
+
+    function saveToFirebase() {
+        set(ref(db, 'uvd_data'), {
+            employees: employees,
+            totalBudget: totalBudget
+        });
     }
 
-    // Сохранение в облако
-    async function saveToFirebase() {
-        try {
-            await fetch(firebaseUrl, {
-                method: "PUT",
-                body: JSON.stringify({ employees, totalBudget })
-            });
-            updateUI();
-        } catch (error) {
-            console.error("Ошибка сохранения:", error);
-            alert("Не удалось отправить данные в облако!");
-        }
-    }
-
-    // Запускаем постоянное обновление каждые 3 секунды для синхронизации ПК
-    window.onload = function() {
-        loadFromFirebase();
-        setInterval(loadFromFirebase, 3000);
-    };
-
-    function changeBudget() {
+    window.changeBudget = function() {
         const val = parseInt(document.getElementById('totalBudgetInput').value);
         totalBudget = isNaN(val) || val < 0 ? 0 : val;
         saveToFirebase();
     }
 
-    function addEmployee() {
+    window.addEmployee = function() {
         const empId = document.getElementById('empId').value.trim();
         const lastName = document.getElementById('lastName').value.trim();
         const firstName = document.getElementById('firstName').value.trim();
@@ -628,8 +623,8 @@
                         </select>
                     </div>
                     <div class="actions">
-                        <button class="btn btn-score-up btn-small" onclick="saveEdit(${emp.id})">💾 Сохранить</button>
-                        <button class="btn btn-edit btn-small" onclick="toggleEdit(${emp.id})">Отмена</button>
+                        <button class="btn btn-score-up btn-small" id="btnSave-${emp.id}">💾 Сохранить</button>
+                        <button class="btn btn-edit btn-small" id="btnCancel-${emp.id}">Отмена</button>
                     </div>
                 `;
             } else {
@@ -667,15 +662,26 @@
                     </div>
                     ${historyHTML}
                     <div class="actions">
-                        <button class="btn btn-score-up btn-small" onclick="openScoreModal(${emp.id})">⭐ Зачесть работу</button>
-                        <button class="btn btn-score-down btn-small" onclick="finePoints(${emp.id})">⚠ Выговор (-5 б.)</button>
-                        <button class="btn btn-edit btn-small" onclick="toggleEdit(${emp.id})">✏ Править</button>
-                        <button class="btn btn-delete btn-small" onclick="deleteEmployee(${emp.id})">🗑 Комиссовать</button>
+                        <button class="btn btn-score-up btn-small" id="btnScore-${emp.id}">⭐ Зачесть работу</button>
+                        <button class="btn btn-score-down btn-small" id="btnFine-${emp.id}">⚠ Выговор (-5 б.)</button>
+                        <button class="btn btn-edit btn-small" id="btnEdit-${emp.id}">✏ Править</button>
+                        <button class="btn btn-delete btn-small" id="btnDel-${emp.id}">🗑 Комиссовать</button>
                     </div>
                 `;
             }
 
             listContainer.appendChild(card);
+
+            // Привязка событий клика к кнопкам
+            if (emp.isEditing) {
+                document.getElementById(`btnSave-${emp.id}`).onclick = () => saveEdit(emp.id);
+                document.getElementById(`btnCancel-${emp.id}`).onclick = () => toggleEdit(emp.id);
+            } else {
+                document.getElementById(`btnScore-${emp.id}`).onclick = () => openScoreModal(emp.id);
+                document.getElementById(`btnFine-${emp.id}`).onclick = () => finePoints(emp.id);
+                document.getElementById(`btnEdit-${emp.id}`).onclick = () => toggleEdit(emp.id);
+                document.getElementById(`btnDel-${emp.id}`).onclick = () => deleteEmployee(emp.id);
+            }
         });
     }
 
@@ -729,12 +735,12 @@
         document.getElementById('scoreModal').style.display = 'flex';
     }
 
-    function closeModal() {
+    window.closeModal = function() {
         document.getElementById('scoreModal').style.display = 'none';
         currentEmployeeId = null;
     }
 
-    function applyPoints() {
+    document.getElementById('btnSubmitPoints').onclick = function() {
         if (!currentEmployeeId) return;
         
         const emp = employees.find(e => e.id === currentEmployeeId);
