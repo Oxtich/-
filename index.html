@@ -3,33 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>УВД — Система учета сотрудников и баллов</title>
+    <title>УВД по ЦАО — RMRP Система Баллов</title>
     <style>
         :root {
-            --bg-color: #f4f6f9;
-            --card-bg: #ffffff;
-            --text-main: #2d3748;
-            --border-radius: 12px;
+            --bg-dark: #0f1319;
+            --panel-bg: #161b24;
+            --card-bg: #1c2330;
+            --input-bg: #242f41;
+            --text-gold: #e2b45c;
+            --text-light: #f0f4f8;
+            --police-blue: #2b5c8f;
+            --border-glow: rgba(43, 92, 143, 0.3);
             
-            /* Цвета должностей */
-            --color-chief: #e53e3e;
-            --color-deputy: #dd6b20;
-            --color-sr-instr: #3182ce;
-            --color-instr: #38a169;
-            --color-trainee: #718096;
+            /* Цвета рангов УВД RMRP */
+            --rank-chief: #e53e3e;
+            --rank-deputy: #dd6b20;
+            --rank-sr-instr: #3182ce;
+            --rank-instr: #38a169;
+            --rank-trainee: #718096;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            padding: 40px 20px;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            padding: 30px 15px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -37,32 +41,121 @@
 
         .container {
             width: 100%;
-            max-width: 800px;
+            max-width: 850px;
         }
 
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #1a202c;
-            font-size: 2rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* Форма добавления */
-        .form-box {
-            background: var(--card-bg);
+        /* Шапка УВД по ЦАО */
+        .mvd-header {
+            background: linear-gradient(135deg, #111622 0%, #1c2436 100%);
+            border: 2px solid #2b384e;
+            border-bottom: 4px solid var(--police-blue);
+            border-radius: 12px;
             padding: 25px;
-            border-radius: var(--border-radius);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            margin-bottom: 30px;
+            text-align: center;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mvd-header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, #d52b1e 0%, #ffffff 50%, #0039a6 100%);
+        }
+
+        .mvd-logo {
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+            display: inline-block;
+        }
+
+        .mvd-header h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            color: var(--text-light);
+            text-transform: uppercase;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .mvd-subtitle {
+            color: #718096;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 5px;
+            font-weight: 600;
+        }
+
+        /* Панель бюджета отдела */
+        .budget-panel {
+            background: var(--panel-bg);
+            border: 1px solid #2d3748;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .budget-title {
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            color: var(--text-gold);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .budget-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .budget-input {
+            background: var(--input-bg);
+            border: 1px solid #4a5568;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            width: 160px;
+            text-align: right;
+        }
+
+        .budget-stats {
+            font-size: 0.85rem;
+            color: #a0aec0;
+            background: rgba(0,0,0,0.2);
+            padding: 6px 12px;
+            border-radius: 4px;
+            border-left: 3px solid var(--text-gold);
+        }
+
+        /* Форма добавления сотрудника */
+        .mvd-form-box {
+            background: var(--panel-bg);
+            border: 1px solid #2d3748;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
 
         .form-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .form-group {
@@ -71,161 +164,181 @@
         }
 
         .form-group label {
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 5px;
-            color: #4a5568;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: #a0aec0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         input, select {
+            background: var(--input-bg);
+            border: 1px solid #4a5568;
+            color: white;
             padding: 10px 12px;
-            border: 1px solid #cbd5e0;
             border-radius: 6px;
-            font-size: 1rem;
+            font-size: 0.95rem;
             outline: none;
-            transition: border 0.2s;
+            transition: all 0.2s;
         }
 
         input:focus, select:focus {
-            border-color: #4299e1;
+            border-color: var(--police-blue);
+            box-shadow: 0 0 8px var(--border-glow);
         }
 
         .btn {
-            padding: 12px 20px;
+            padding: 10px 18px;
             border: none;
             border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 600;
+            font-size: 0.9rem;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.2s;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .btn-add {
-            background-color: #3182ce;
+            background-color: var(--police-blue);
             color: white;
             width: 100%;
+            padding: 12px;
+            border-bottom: 3px solid #1a3a5f;
         }
 
-        .btn-add:hover { background-color: #2b6cb0; }
+        .btn-add:hover { background-color: #3b73b2; }
 
         /* Список сотрудников */
         .employee-list {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 15px;
         }
 
         .employee-card {
             background: var(--card-bg);
-            border-radius: var(--border-radius);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            padding: 20px;
-            border-left: 6px solid var(--rank-color, #cbd5e0);
+            border: 1px solid #2d3748;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 6px solid var(--card-rank-color, #cbd5e0);
             position: relative;
-            transition: transform 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
 
-        /* Стили границ карточек по рангам */
-        .rank-chief { --rank-color: var(--color-chief); }
-        .rank-deputy { --rank-color: var(--color-deputy); }
-        .rank-sr-instr { --rank-color: var(--color-sr-instr); }
-        .rank-instr { --rank-color: var(--color-instr); }
-        .rank-trainee { --rank-color: var(--color-trainee); }
+        .employee-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+        }
+
+        /* Привязка цветов рангов к карточкам */
+        .rank-chief { --card-rank-color: var(--rank-chief); }
+        .rank-deputy { --card-rank-color: var(--rank-deputy); }
+        .rank-sr-instr { --card-rank-color: var(--rank-sr-instr); }
+        .rank-instr { --card-rank-color: var(--rank-instr); }
+        .rank-trainee { --card-rank-color: var(--rank-trainee); }
 
         .card-header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 15px;
+            align-items: center;
             flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .info-block {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .name-wrapper {
+            display: flex;
+            align-items: center;
             gap: 10px;
         }
 
-        .info-block h3 {
-            font-size: 1.25rem;
-            color: #1a202c;
-            margin-bottom: 4px;
+        .id-badge {
+            background: #111622;
+            color: #718096;
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 3px 6px;
+            border-radius: 4px;
+            border: 1px solid #2d3748;
         }
 
-        .emp-id-badge {
-            font-size: 0.85rem;
-            color: #718096;
-            font-weight: normal;
-            background: #edf2f7;
-            padding: 2px 6px;
-            border-radius: 4px;
-            margin-right: 5px;
+        .employee-card h3 {
+            font-size: 1.2rem;
+            color: white;
+            font-weight: 700;
         }
 
         .rank-badge {
             display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 800;
             color: white;
             text-transform: uppercase;
-            background-color: var(--rank-color);
+            letter-spacing: 0.5px;
+            background-color: var(--card-rank-color);
+            width: max-content;
         }
 
-        /* Блок баллов */
-        .score-box {
+        /* Блоки с цифрами */
+        .stats-wrapper {
             display: flex;
-            align-items: center;
             gap: 15px;
-            background: #f7fafc;
-            padding: 10px 15px;
-            border-radius: 8px;
         }
 
-        .score-count {
-            font-size: 1.5rem;
+        .stat-box {
+            background: #111622;
+            border: 1px solid #2d3748;
+            padding: 8px 14px;
+            border-radius: 6px;
+            text-align: center;
+            min-width: 90px;
+        }
+
+        .stat-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            color: #718096;
+            margin-bottom: 2px;
+            font-weight: 700;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
             font-weight: 800;
-            color: #2d3748;
         }
 
-        /* Кнопки действий */
-        .actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-            flex-wrap: wrap;
-        }
+        .value-points { color: #38a169; }
+        .value-money { color: var(--text-gold); }
 
-        .btn-small {
-            padding: 6px 12px;
-            font-size: 0.85rem;
-            border-radius: 4px;
-        }
-
-        .btn-score-up { background-color: #38a169; color: white; }
-        .btn-score-up:hover { background-color: #2f855a; }
-
-        .btn-score-down { background-color: #e53e3e; color: white; }
-        .btn-score-down:hover { background-color: #c53030; }
-
-        .btn-edit { background-color: #edf2f7; color: #4a5568; }
-        .btn-edit:hover { background-color: #e2e8f0; }
-        
-        .btn-delete { background-color: #fff5f5; color: #e53e3e; border: 1px solid #fed7d7; }
-        .btn-delete:hover { background-color: #fed7d7; }
-
-        /* Логи и история */
+        /* Логи / История */
         .history-box {
             margin-top: 15px;
             font-size: 0.8rem;
-            color: #718096;
-            border-top: 1px dashed #e2e8f0;
+            color: #a0aec0;
+            border-top: 1px dashed #2d3748;
             padding-top: 10px;
         }
 
         .history-title {
-            font-weight: 600;
+            font-weight: 700;
+            color: #718096;
+            text-transform: uppercase;
+            font-size: 0.7rem;
             margin-bottom: 5px;
+            letter-spacing: 0.5px;
         }
 
         .history-list {
@@ -234,30 +347,70 @@
             overflow-y: auto;
         }
 
-        /* Окно выдачи баллов (Модальное меню) */
+        .history-list li {
+            padding: 2px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+        }
+
+        /* Кнопки действий */
+        .actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            border-radius: 4px;
+        }
+
+        .btn-score-up { background-color: #2f855a; color: white; }
+        .btn-score-up:hover { background-color: #276749; }
+
+        .btn-score-down { background-color: #9b2c2c; color: white; }
+        .btn-score-down:hover { background-color: #742a2a; }
+
+        .btn-edit { background-color: #2d3748; color: #cbd5e0; border: 1px solid #4a5568; }
+        .btn-edit:hover { background-color: #4a5568; }
+
+        .btn-delete { background-color: #742a2a; color: #fc8181; margin-left: auto; }
+        .btn-delete:hover { background-color: #9b2c2c; }
+
+        /* Модалка начисления баллов */
         .modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
             justify-content: center;
             align-items: center;
             z-index: 100;
         }
 
         .modal-content {
-            background: white;
+            background: var(--panel-bg);
+            border: 2px solid var(--police-blue);
             padding: 25px;
-            border-radius: var(--border-radius);
+            border-radius: 10px;
             width: 100%;
-            max-width: 450px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            max-width: 480px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        .modal h3 { margin-bottom: 15px; }
+        .modal h3 {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            border-bottom: 1px solid #2d3748;
+            padding-bottom: 10px;
+            color: var(--text-light);
+        }
 
         .modal-select {
             width: 100%;
+            margin-top: 8px;
             margin-bottom: 20px;
         }
 
@@ -267,310 +420,347 @@
             gap: 10px;
         }
 
-        /* Поля редактирования внутри карточки */
+        /* Редактирование */
         .edit-fields {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 10px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .edit-fields select {
+            grid-column: span 2;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Учет Личного Состава УВД</h1>
+    <div class="container">
+        <div class="mvd-header">
+            <div class="mvd-logo">🦅</div>
+            <h1>УВД по ЦАО г. Москвы</h1>
+            <div class="mvd-subtitle">Система мониторинга состава и премирования (RMRP)</div>
+        </div>
 
-    <!-- Форма добавления сотрудника -->
-    <div class="form-box">
-        <div class="form-grid">
-            <div class="form-group">
-                <label>ID сотрудника</label>
-                <input type="text" id="empId" placeholder="Например: 1024">
+        <div class="budget-panel">
+            <div class="budget-title">💰 Общий призовой фонд отдела:</div>
+            <div class="budget-input-wrapper">
+                <input type="number" id="totalBudgetInput" class="budget-input" value="30000000" oninput="changeBudget()">
+                <span style="font-weight: 800; color: var(--text-gold);">₽</span>
             </div>
-            <div class="form-group">
-                <label>Фамилия</label>
-                <input type="text" id="lastName" placeholder="Иванов">
+            <div class="budget-stats" id="budgetStatsText">
+                Всего баллов в отделе: 0 | Стоимость 1 балла: 0 ₽
             </div>
-            <div class="form-group">
-                <label>Имя</label>
-                <input type="text" id="firstName" placeholder="Иван">
+        </div>
+
+        <div class="mvd-form-box">
+            <div class="form-grid">
+                <div class="form-group" style="flex: 0.5;">
+                    <label>ID жетона</label>
+                    <input type="text" id="empId" placeholder="1024">
+                </div>
+                <div class="form-group">
+                    <label>Фамилия</label>
+                    <input type="text" id="lastName" placeholder="Иванов">
+                </div>
+                <div class="form-group">
+                    <label>Имя</label>
+                    <input type="text" id="firstName" placeholder="Иван">
+                </div>
+                <div class="form-group">
+                    <label>Должность / Звание</label>
+                    <select id="position">
+                        <option value="chief">Начальник</option>
+                        <option value="deputy">Зам начальника</option>
+                        <option value="sr-instr">Старший инструктор</option>
+                        <option value="instr">Инструктор</option>
+                        <option value="trainee">Стажер</option>
+                    </select>
+                </div>
             </div>
+            <button class="btn btn-add" onclick="addEmployee()">➕ Внести сотрудника в личный состав</button>
+        </div>
+
+        <div class="employee-list" id="employeeList"></div>
+    </div>
+
+    <div class="modal" id="scoreModal">
+        <div class="modal-content">
+            <h3 id="modalEmployeeName">Подать рапорт о работе</h3>
             <div class="form-group">
-                <label>Должность / Звание</label>
-                <select id="position">
-                    <option value="chief">Начальник</option>
-                    <option value="deputy">Зам начальника</option>
-                    <option value="sr-instr">Старший инструктор</option>
-                    <option value="instr">Инструктор</option>
-                    <option value="trainee">Стажер</option>
+                <label>Выполненная служебная задача:</label>
+                <select id="taskSelect" class="modal-select">
+                    <option value="10">Проведение собеседования (+10 б.)</option>
+                    <option value="5">Помощь в собеседовании (+5 б.)</option>
+                    <option value="15">Проведение лекции (+15 б.)</option>
+                    <option value="15">Проведение экзамена (+15 б.)</option>
+                    <option value="10">Принятие присяги (+10 б.)</option>
+                    <option value="10">Провел экскурсию по УВД (+10 б.)</option>
+                    <option value="20">Принял экзамен по практике задержания и ареста (+20 б.)</option>
                 </select>
             </div>
-        </div>
-        <button class="btn btn-add" onclick="addEmployee()">➕ Добавить сотрудника</button>
-    </div>
-
-    <!-- Список сотрудников -->
-    <div class="employee-list" id="employeeList"></div>
-</div>
-
-<!-- Модальное окно для начисления баллов -->
-<div class="modal" id="scoreModal">
-    <div class="modal-content">
-        <h3 id="modalEmployeeName">Начислить баллы</h3>
-        <div class="form-group">
-            <label>Выберите выполненное действие:</label>
-            <select id="taskSelect" class="modal-select">
-                <option value="10">Проведение собеседования (+10 б.)</option>
-                <option value="5">Помощь в собеседовании (+5 б.)</option>
-                <option value="15">Проведение лекции (+15 б.)</option>
-                <option value="15">Проведение экзамена (+15 б.)</option>
-                <option value="10">Принятие присяги (+10 б.)</option>
-                <option value="10">Провел экскурсию по УВД (+10 б.)</option>
-                <option value="20">Принял экзамен по практике задержания (+20 б.)</option>
-            </select>
-        </div>
-        <div class="modal-buttons">
-            <button class="btn btn-edit btn-small" onclick="closeModal()">Отмена</button>
-            <button class="btn btn-score-up btn-small" onclick="applyPoints()">Начислить</button>
+            <div class="modal-buttons">
+                <button class="btn btn-edit btn-small" onclick="closeModal()">Отмена</button>
+                <button class="btn btn-score-up btn-small" onclick="applyPoints()">Утвердить и начислить</button>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-    // Загрузка массива сотрудников из LocalStorage или создание пустого
-    let employees = JSON.parse(localStorage.getItem('uvd_employees')) || [];
-    let currentEmployeeId = null;
+    <script>
+        let employees = [];
+        let currentEmployeeId = null;
+        let totalBudget = 30000000;
 
-    // Справка по рангам для сортировки и названий
-    const rankConfig = {
-        'chief': { order: 1, text: 'Начальник', class: 'rank-chief' },
-        'deputy': { order: 2, text: 'Зам начальника', class: 'rank-deputy' },
-        'sr-instr': { order: 3, text: 'Старший инструктор', class: 'rank-sr-instr' },
-        'instr': { order: 4, text: 'Инструктор', class: 'rank-instr' },
-        'trainee': { order: 5, text: 'Стажер', class: 'rank-trainee' }
-    };
-
-    // Сохранение данных в память браузера
-    function saveData() {
-        localStorage.setItem('uvd_employees', JSON.stringify(employees));
-    }
-
-    // Функция добавления сотрудника
-    function addEmployee() {
-        const empId = document.getElementById('empId').value.trim();
-        const lastName = document.getElementById('lastName').value.trim();
-        const firstName = document.getElementById('firstName').value.trim();
-        const position = document.getElementById('position').value;
-
-        if (!empId || !lastName || !firstName) {
-            alert('Пожалуйста, заполните все поля (ID, Фамилию и Имя)!');
-            return;
-        }
-
-        // Проверка на уникальность ID
-        const idExists = employees.some(e => e.customId === empId);
-        if (idExists) {
-            alert('Сотрудник с таким ID уже существует!');
-            return;
-        }
-
-        const newEmployee = {
-            id: Date.now(), // уникальный внутренний ключ для JS
-            customId: empId, // пользовательский ID
-            lastName: lastName,
-            firstName: firstName,
-            position: position,
-            score: 0,
-            history: [],
-            isEditing: false
+        const rankConfig = {
+            'chief': { order: 1, text: 'Начальник', class: 'rank-chief' },
+            'deputy': { order: 2, text: 'Зам начальника', class: 'rank-deputy' },
+            'sr-instr': { order: 3, text: 'Старший инструктор', class: 'rank-sr-instr' },
+            'instr': { order: 4, text: 'Инструктор', class: 'rank-instr' },
+            'trainee': { order: 5, text: 'Стажер', class: 'rank-trainee' }
         };
 
-        employees.push(newEmployee);
-        
-        // Сброс формы
-        document.getElementById('empId').value = '';
-        document.getElementById('lastName').value = '';
-        document.getElementById('firstName').value = '';
-        document.getElementById('position').value = 'chief';
+        // Загрузка сохраненных данных при старте
+        window.onload = function() {
+            const savedData = localStorage.getItem('mvd_database');
+            const savedBudget = localStorage.getItem('mvd_budget');
+            
+            if (savedData) {
+                employees = JSON.parse(savedData);
+            }
+            if (savedBudget) {
+                totalBudget = parseInt(savedBudget) || 30000000;
+                document.getElementById('totalBudgetInput').value = totalBudget;
+            }
+            updateUI();
+        };
 
-        saveData();
-        updateUI();
-    }
+        function saveToLocalStorage() {
+            localStorage.setItem('mvd_database', JSON.stringify(employees));
+            localStorage.setItem('mvd_budget', totalBudget.toString());
+        }
 
-    // Обновление интерфейса (сортировка + отрисовка)
-    function updateUI() {
-        const listContainer = document.getElementById('employeeList');
-        listContainer.innerHTML = '';
+        function changeBudget() {
+            const val = parseInt(document.getElementById('totalBudgetInput').value);
+            totalBudget = isNaN(val) || val < 0 ? 0 : val;
+            saveToLocalStorage();
+            updateUI();
+        }
 
-        // Автоматическая сортировка по иерархии должностей
-        employees.sort((a, b) => rankConfig[a.position].order - rankConfig[b.position].order);
+        function addEmployee() {
+            const empId = document.getElementById('empId').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const firstName = document.getElementById('firstName').value.trim();
+            const position = document.getElementById('position').value;
 
-        employees.forEach(emp => {
-            const config = rankConfig[emp.position];
-            const card = document.createElement('div');
-            card.className = `employee-card ${config.class}`;
+            if (!empId || !lastName || !firstName) {
+                alert('Заполните все поля служебной карточки (ID, Фамилия, Имя)!');
+                return;
+            }
 
-            if (emp.isEditing) {
-                // Если карточка в режиме редактирования
-                card.innerHTML = `
-                    <div class="edit-fields">
-                        <label style="font-size:0.8rem; font-weight:bold;">ID сотрудника:</label>
-                        <input type="text" id="editId-${emp.id}" value="${emp.customId || ''}">
-                        <label style="font-size:0.8rem; font-weight:bold;">Фамилия:</label>
-                        <input type="text" id="editLast-${emp.id}" value="${emp.lastName}">
-                        <label style="font-size:0.8rem; font-weight:bold;">Имя:</label>
-                        <input type="text" id="editFirst-${emp.id}" value="${emp.firstName}">
-                        <label style="font-size:0.8rem; font-weight:bold;">Должность:</label>
-                        <select id="editPos-${emp.id}">
-                            <option value="chief" ${emp.position === 'chief' ? 'selected' : ''}>Начальник</option>
-                            <option value="deputy" ${emp.position === 'deputy' ? 'selected' : ''}>Зам начальника</option>
-                            <option value="sr-instr" ${emp.position === 'sr-instr' ? 'selected' : ''}>Старший инструктор</option>
-                            <option value="instr" ${emp.position === 'instr' ? 'selected' : ''}>Инструктор</option>
-                            <option value="trainee" ${emp.position === 'trainee' ? 'selected' : ''}>Стажер</option>
-                        </select>
-                    </div>
-                    <div class="actions">
-                        <button class="btn btn-score-up btn-small" onclick="saveEdit(${emp.id})">💾 Сохранить</button>
-                        <button class="btn btn-edit btn-small" onclick="toggleEdit(${emp.id})">Отмена</button>
-                    </div>
-                `;
-            } else {
-                // Обычный вид карточки
-                let historyHTML = '';
-                if (emp.history && emp.history.length > 0) {
-                    historyHTML = `
-                        <div class="history-box">
-                            <div class="history-title">История баллов:</div>
-                            <ul class="history-list">
-                                ${emp.history.map(item => `<li>• ${item}</li>`).reverse().join('')}
-                            </ul>
+            // Проверка уникальности ID жетона
+            const idExists = employees.some(e => e.empId === empId);
+            if (idExists) {
+                alert(`Сотрудник с ID жетона ${empId} уже числится в составе УВД!`);
+                return;
+            }
+
+            const newEmployee = {
+                id: Date.now(),
+                empId: empId,
+                lastName: lastName,
+                firstName: firstName,
+                position: position,
+                score: 0,
+                history: [],
+                isEditing: false
+            };
+
+            employees.push(newEmployee);
+            
+            // Сброс полей
+            document.getElementById('empId').value = '';
+            document.getElementById('lastName').value = '';
+            document.getElementById('firstName').value = '';
+            document.getElementById('position').value = 'trainee';
+
+            saveToLocalStorage();
+            updateUI();
+        }
+
+        function updateUI() {
+            const listContainer = document.getElementById('employeeList');
+            listContainer.innerHTML = '';
+
+            // Расчет общей суммы баллов
+            const totalPoints = employees.reduce((sum, emp) => sum + emp.score, 0);
+            
+            // Расчет стоимости одного балла
+            const pointValue = totalPoints > 0 ? (totalBudget / totalPoints) : 0;
+
+            // Обновление строки статистики в панели бюджета
+            document.getElementById('budgetStatsText').innerText = 
+                `Всего баллов в отделе: ${totalPoints} | Стоимость 1 балла: ${Math.floor(pointValue).toLocaleString('ru-RU')} ₽`;
+
+            // Сортировка по табелю о рангах
+            employees.sort((a, b) => rankConfig[a.position].order - rankConfig[b.position].order);
+
+            employees.forEach(emp => {
+                const config = rankConfig[emp.position];
+                const currentPremia = Math.floor(emp.score * pointValue);
+                
+                const card = document.createElement('div');
+                card.className = `employee-card ${config.class}`;
+
+                if (emp.isEditing) {
+                    card.innerHTML = `
+                        <div class="edit-fields">
+                            <input type="text" id="editId-${emp.id}" value="${emp.empId}" placeholder="ID">
+                            <input type="text" id="editLast-${emp.id}" value="${emp.lastName}" placeholder="Фамилия">
+                            <input type="text" id="editFirst-${emp.id}" value="${emp.firstName}" placeholder="Имя">
+                            <select id="editPos-${emp.id}">
+                                <option value="chief" ${emp.position === 'chief' ? 'selected' : ''}>Начальник</option>
+                                <option value="deputy" ${emp.position === 'deputy' ? 'selected' : ''}>Зам начальника</option>
+                                <option value="sr-instr" ${emp.position === 'sr-instr' ? 'selected' : ''}>Старший инструктор</option>
+                                <option value="instr" ${emp.position === 'instr' ? 'selected' : ''}>Инструктор</option>
+                                <option value="trainee" ${emp.position === 'trainee' ? 'selected' : ''}>Стажер</option>
+                            </select>
+                        </div>
+                        <div class="actions">
+                            <button class="btn btn-score-up btn-small" onclick="saveEdit(${emp.id})">💾 Сохранить</button>
+                            <button class="btn btn-edit btn-small" onclick="toggleEdit(${emp.id})">Отмена</button>
+                        </div>
+                    `;
+                } else {
+                    let historyHTML = '';
+                    if (emp.history.length > 0) {
+                        historyHTML = `
+                            <div class="history-box">
+                                <div class="history-title">Рапорты о выполнении задач:</div>
+                                <ul class="history-list">
+                                    ${emp.history.map(item => `<li>• ${item}</li>`).reverse().join('')}
+                                </ul>
+                            </div>
+                        `;
+                    }
+
+                    card.innerHTML = `
+                        <div class="card-header">
+                            <div class="info-block">
+                                <div class="name-wrapper">
+                                    <span class="id-badge">ID ${emp.empId}</span>
+                                    <h3>${emp.lastName} ${emp.firstName}</h3>
+                                </div>
+                                <span class="rank-badge">${config.text}</span>
+                            </div>
+                            <div class="stats-wrapper">
+                                <div class="stat-box">
+                                    <div class="stat-label">Баллы</div>
+                                    <div class="stat-value value-points">${emp.score}</div>
+                                </div>
+                                <div class="stat-box">
+                                    <div class="stat-label">Премия</div>
+                                    <div class="stat-value value-money">${currentPremia.toLocaleString('ru-RU')} ₽</div>
+                                </div>
+                            </div>
+                        </div>
+                        ${historyHTML}
+                        <div class="actions">
+                            <button class="btn btn-score-up btn-small" onclick="openScoreModal(${emp.id})">⭐ Зачесть работу</button>
+                            <button class="btn btn-score-down btn-small" onclick="finePoints(${emp.id})">⚠ Выговор (-5 б.)</button>
+                            <button class="btn btn-edit btn-small" onclick="toggleEdit(${emp.id})">✏ Править</button>
+                            <button class="btn btn-delete btn-small" onclick="deleteEmployee(${emp.id})">🗑 Комиссовать</button>
                         </div>
                     `;
                 }
 
-                card.innerHTML = `
-                    <div class="card-header">
-                        <div class="info-block">
-                            <h3><span class="emp-id-badge">ID: ${emp.customId || '—'}</span>${emp.lastName} ${emp.firstName}</h3>
-                            <span class="rank-badge">${config.text}</span>
-                        </div>
-                        <div class="score-box">
-                            <span>Баллы:</span>
-                            <span class="score-count">${emp.score}</span>
-                        </div>
-                    </div>
-                    ${historyHTML}
-                    <div class="actions">
-                        <button class="btn btn-score-up btn-small" onclick="openScoreModal(${emp.id})">⭐ Начислить баллы</button>
-                        <button class="btn btn-score-down btn-small" onclick="finePoints(${emp.id})">⚠ Списать 5 б.</button>
-                        <button class="btn btn-edit btn-small" onclick="toggleEdit(${emp.id})">✏ Редактировать</button>
-                        <button class="btn btn-delete btn-small" onclick="deleteEmployee(${emp.id})">🗑 Удалить</button>
-                    </div>
-                `;
+                listContainer.appendChild(card);
+            });
+        }
+
+        function toggleEdit(id) {
+            const emp = employees.find(e => e.id === id);
+            if (emp) {
+                emp.isEditing = !emp.isEditing;
+                updateUI();
             }
-
-            listContainer.appendChild(card);
-        });
-    }
-
-    // Функции редактирования
-    function toggleEdit(id) {
-        const emp = employees.find(e => e.id === id);
-        if (emp) {
-            emp.isEditing = !emp.isEditing;
-            updateUI();
         }
-    }
 
-    function saveEdit(id) {
-        const emp = employees.find(e => e.id === id);
-        if (emp) {
-            const newId = document.getElementById(`editId-${id}`).value.trim();
-            const newLast = document.getElementById(`editLast-${id}`).value.trim();
-            const newFirst = document.getElementById(`editFirst-${id}`).value.trim();
-            const newPos = document.getElementById(`editPos-${id}`).value;
+        function saveEdit(id) {
+            const emp = employees.find(e => e.id === id);
+            if (emp) {
+                const newId = document.getElementById(`editId-${id}`).value.trim();
+                const newLast = document.getElementById(`editLast-${id}`).value.trim();
+                const newFirst = document.getElementById(`editFirst-${id}`).value.trim();
+                const newPos = document.getElementById(`editPos-${id}`).value;
 
-            if (!newId || !newLast || !newFirst) {
-                alert('Все поля должны быть заполнены!');
-                return;
+                if (!newId || !newLast || !newFirst) {
+                    alert('Все поля обязательны к заполнению!');
+                    return;
+                }
+
+                // Проверка дубликата ID (кроме самого себя)
+                const idExists = employees.some(e => e.empId === newId && e.id !== id);
+                if (idExists) {
+                    alert(`Жетон ID ${newId} уже занят другим сотрудником!`);
+                    return;
+                }
+
+                emp.empId = newId;
+                emp.lastName = newLast;
+                emp.firstName = newFirst;
+                emp.position = newPos;
+                emp.isEditing = false;
+                saveToLocalStorage();
+                updateUI();
             }
+        }
 
-            // Проверка на уникальность ID среди других сотрудников
-            const idExists = employees.some(e => e.id !== id && e.customId === newId);
-            if (idExists) {
-                alert('Этот ID уже занят другим сотрудником!');
-                return;
+        function deleteEmployee(id) {
+            if (confirm('Вы уверены, что хотите исключить сотрудника из личного состава УВД?')) {
+                employees = employees.filter(e => e.id !== id);
+                saveToLocalStorage();
+                updateUI();
             }
+        }
 
-            emp.customId = newId;
-            emp.lastName = newLast;
-            emp.firstName = newFirst;
-            emp.position = newPos;
-            emp.isEditing = false;
+        function openScoreModal(id) {
+            currentEmployeeId = id;
+            const emp = employees.find(e => e.id === id);
+            document.getElementById('modalEmployeeName').innerText = `Рапорт по сотруднику: ${emp.lastName} (ID ${emp.empId})`;
+            document.getElementById('scoreModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('scoreModal').style.display = 'none';
+            currentEmployeeId = null;
+        }
+
+        function applyPoints() {
+            if (!currentEmployeeId) return;
             
-            saveData();
-            updateUI();
+            const emp = employees.find(e => e.id === currentEmployeeId);
+            const taskSelect = document.getElementById('taskSelect');
+            const selectedText = taskSelect.options[taskSelect.selectedIndex].text;
+            const points = parseInt(taskSelect.value) || 0;
+
+            if (emp) {
+                emp.score += points;
+                emp.history.push(`+${points} б. за ${selectedText.toLowerCase().replace(/ \(\+\d+ б\.\)/, '')}`);
+                closeModal();
+                saveToLocalStorage();
+                updateUI();
+            }
         }
-    }
 
-    // Удаление сотрудника
-    function deleteEmployee(id) {
-        if (confirm('Вы уверены, что хотите удалить этого сотрудника?')) {
-            employees = employees.filter(e => e.id !== id);
-            saveData();
-            updateUI();
+        function finePoints(id) {
+            const emp = employees.find(e => e.id === id);
+            if (emp) {
+                emp.score = Math.max(0, emp.score - 5);
+                emp.history.push(`-5 б. Взыскание за нарушение дисциплины/устава`);
+                saveToLocalStorage();
+                updateUI();
+            }
         }
-    }
-
-    // Управление модальным окном баллов
-    function openScoreModal(id) {
-        currentEmployeeId = id;
-        const emp = employees.find(e => e.id === id);
-        document.getElementById('modalEmployeeName').innerText = `Начисление: [ID: ${emp.customId}] ${emp.lastName} ${emp.firstName}`;
-        document.getElementById('scoreModal').style.display = 'flex';
-    }
-
-    function closeModal() {
-        document.getElementById('scoreModal').style.display = 'none';
-        currentEmployeeId = null;
-    }
-
-    function applyPoints() {
-        if (!currentEmployeeId) return;
-        
-        const emp = employees.find(e => e.id === currentEmployeeId);
-        const taskSelect = document.getElementById('taskSelect');
-        const selectedText = taskSelect.options[taskSelect.selectedIndex].text;
-        const points = parseInt(taskSelect.value) || 0;
-
-        if (emp) {
-            emp.score += points;
-            if (!emp.history) emp.history = [];
-            emp.history.push(`+${points} б. за: ${selectedText}`);
-            
-            closeModal();
-            saveData();
-            updateUI();
-        }
-    }
-
-    // Ручное быстрое списание (штраф)
-    function finePoints(id) {
-        const emp = employees.find(e => e.id === id);
-        if (emp) {
-            emp.score = Math.max(0, emp.score - 5);
-            if (!emp.history) emp.history = [];
-            emp.history.push(`-5 б. (Взыскание/Корректировка)`);
-            
-            saveData();
-            updateUI();
-        }
-    }
-
-    // Первичная отрисовка при загрузке страницы
-    updateUI();
-</script>
+    </script>
 
 </body>
 </html>
