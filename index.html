@@ -3,22 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Управление сотрудниками и баллами</title>
+    <title>УВД — Система учета сотрудников и баллов</title>
     <style>
         :root {
-            --primary: #4f46e5;
-            --primary-hover: #4338ca;
-            --success: #10b981;
-            --success-hover: #059669;
-            --danger: #ef4444;
-            --danger-hover: #dc2626;
-            --warning: #f59e0b;
-            --warning-hover: #d97706;
-            --background: #f8fafc;
+            --bg-color: #f4f6f9;
             --card-bg: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
+            --text-main: #2d3748;
+            --border-radius: 12px;
+            
+            /* Цвета должностей */
+            --color-chief: #e53e3e;
+            --color-deputy: #dd6b20;
+            --color-sr-instr: #3182ce;
+            --color-instr: #38a169;
+            --color-trainee: #718096;
         }
 
         * {
@@ -29,11 +27,12 @@
         }
 
         body {
-            background-color: var(--background);
+            background-color: var(--bg-color);
             color: var(--text-main);
-            padding: 2rem 1rem;
+            padding: 40px 20px;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
         }
 
         .container {
@@ -43,368 +42,467 @@
 
         h1 {
             text-align: center;
-            margin-bottom: 2rem;
-            color: var(--primary);
+            margin-bottom: 30px;
+            color: #1a202c;
             font-size: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         /* Форма добавления */
-        .form-container {
+        .form-box {
             background: var(--card-bg);
-            padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-            margin-bottom: 2rem;
-            border: 1px solid var(--border);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
         }
 
         .form-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+            gap: 15px;
+            margin-bottom: 20px;
         }
 
         .form-group {
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
         }
 
         .form-group label {
-            font-size: 0.875rem;
+            font-size: 0.85rem;
             font-weight: 600;
-            color: var(--text-muted);
+            margin-bottom: 5px;
+            color: #4a5568;
         }
 
-        .form-group input {
-            padding: 0.75rem;
-            border: 1px solid var(--border);
-            border-radius: 8px;
+        input, select {
+            padding: 10px 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
             font-size: 1rem;
             outline: none;
-            transition: border-color 0.2s;
+            transition: border 0.2s;
         }
 
-        .form-group input:focus {
-            border-color: var(--primary);
+        input:focus, select:focus {
+            border-color: #4299e1;
         }
 
         .btn {
-            width: 100%;
-            padding: 0.75rem;
+            padding: 12px 20px;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
-        .btn:active {
-            transform: scale(0.98);
-        }
-
-        .btn-primary {
-            background-color: var(--primary);
+        .btn-add {
+            background-color: #3182ce;
             color: white;
+            width: 100%;
         }
 
-        .btn-primary:hover {
-            background-color: var(--primary-hover);
-        }
+        .btn-add:hover { background-color: #2b6cb0; }
 
         /* Список сотрудников */
         .employee-list {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 20px;
         }
 
         .employee-card {
             background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.25rem;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            padding: 20px;
+            border-left: 6px solid var(--rank-color, #cbd5e0);
+            position: relative;
+            transition: transform 0.2s;
+        }
+
+        /* Стили границ карточек по рангам */
+        .rank-chief { --rank-color: var(--color-chief); }
+        .rank-deputy { --rank-color: var(--color-deputy); }
+        .rank-sr-instr { --rank-color: var(--color-sr-instr); }
+        .rank-instr { --rank-color: var(--color-instr); }
+        .rank-trainee { --rank-color: var(--color-trainee); }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .info-block h3 {
+            font-size: 1.25rem;
+            color: #1a202c;
+            margin-bottom: 4px;
+        }
+
+        .rank-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: white;
+            text-transform: uppercase;
+            background-color: var(--rank-color);
+        }
+
+        /* Блок баллов */
+        .score-box {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-            gap: 1rem;
+            gap: 15px;
+            background: #f7fafc;
+            padding: 10px 15px;
+            border-radius: 8px;
+        }
+
+        .score-count {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #2d3748;
+        }
+
+        /* Кнопки действий */
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
             flex-wrap: wrap;
         }
 
-        .employee-info {
-            flex: 1;
-            min-width: 200px;
-        }
-
-        /* Стили для режима просмотра текста */
-        .info-view h3 {
-            font-size: 1.25rem;
-            color: var(--text-main);
-            margin-bottom: 0.25rem;
-        }
-
-        .info-view p {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-
-        /* Стили для режима редактирования текста */
-        .info-edit {
-            display: none;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .info-edit input {
-            padding: 0.4rem 0.6rem;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 0.9rem;
-            width: 100%;
-        }
-
-        /* Блок управления баллами */
-        .score-section {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .score-badge {
-            background-color: #f1f5f9;
-            color: var(--primary);
-            font-weight: 700;
-            font-size: 1.25rem;
-            min-width: 3rem;
-            height: 3rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            border: 2px solid var(--border);
-        }
-
-        .score-buttons {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .btn-action {
-            width: 2.5rem;
-            height: 2.5rem;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.25rem;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            transition: background-color 0.2s;
-        }
-
-        .btn-plus { background-color: var(--success); }
-        .btn-plus:hover { background-color: var(--success-hover); }
-        .btn-minus { background-color: var(--danger); }
-        .btn-minus:hover { background-color: var(--danger-hover); }
-
-        /* Кнопки редактирования профиля */
-        .edit-buttons {
-            display: flex;
-            gap: 0.5rem;
-        }
-
         .btn-small {
-            padding: 0.5rem 0.75rem;
+            padding: 6px 12px;
             font-size: 0.85rem;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background-color 0.2s;
+            border-radius: 4px;
         }
 
-        .btn-edit { background-color: #e2e8f0; color: var(--text-main); }
-        .btn-edit:hover { background-color: #cbd5e1; }
-        .btn-save { background-color: var(--warning); color: white; display: none; }
-        .btn-save:hover { background-color: var(--warning-hover); }
+        .btn-score-up { background-color: #38a169; color: white; }
+        .btn-score-up:hover { background-color: #2f855a; }
+
+        .btn-score-down { background-color: #e53e3e; color: white; }
+        .btn-score-down:hover { background-color: #c53030; }
+
+        .btn-edit { background-color: #edf2f7; color: #4a5568; }
+        .btn-edit:hover { background-color: #e2e8f0; }
+
+        /* Логи и история */
+        .history-box {
+            margin-top: 15px;
+            font-size: 0.8rem;
+            color: #718096;
+            border-top: 1px dashed #e2e8f0;
+            padding-top: 10px;
+        }
+
+        .history-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .history-list {
+            list-style: none;
+            max-height: 80px;
+            overflow-y: auto;
+        }
+
+        /* Окно выдачи баллов (Модальное меню) */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .modal h3 { margin-bottom: 15px; }
+
+        .modal-select {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Поля редактирования внутри карточки */
+        .edit-fields {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Система учета сотрудников</h1>
+<div class="container">
+    <h1>Учет Личного Состава УВД</h1>
 
-        <!-- Форма добавления сотрудника -->
-        <div class="form-container">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="lastName">Фамилия</label>
-                    <input type="text" id="lastName" placeholder="Иванов">
-                </div>
-                <div class="form-group">
-                    <label for="firstName">Имя</label>
-                    <input type="text" id="firstName" placeholder="Иван">
-                </div>
-                <div class="form-group">
-                    <label for="position">Звание / Должность</label>
-                    <input type="text" id="position" placeholder="Старший менеджер">
-                </div>
+    <!-- Форма добавления сотрудника -->
+    <div class="form-box">
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Фамилия</label>
+                <input type="text" id="lastName" placeholder="Иванов">
             </div>
-            <button class="btn btn-primary" onclick="addEmployee()">Добавить сотрудника</button>
+            <div class="form-group">
+                <label>Имя</label>
+                <input type="text" id="firstName" placeholder="Иван">
+            </div>
+            <div class="form-group">
+                <label>Должность / Звание</label>
+                <select id="position">
+                    <option value="chief">Начальник</option>
+                    <option value="deputy">Зам начальника</option>
+                    <option value="sr-instr">Старший инструктор</option>
+                    <option value="instr">Инструктор</option>
+                    <option value="trainee">Стажер</option>
+                </select>
+            </div>
         </div>
-
-        <!-- Список сотрудников -->
-        <div class="employee-list" id="employeeList">
-            <!-- Сюда будут добавляться карточки сотрудников через JavaScript -->
-        </div>
+        <button class="btn btn-add" onclick="addEmployee()">➕ Добавить сотрудника</button>
     </div>
 
-    <script>
-        // Массив для хранения данных о сотрудниках
-        let employees = [];
+    <!-- Список сотрудников -->
+    <div class="employee-list" id="employeeList"></div>
+</div>
 
-        // Функция добавления нового сотрудника
-        function addEmployee() {
-            const lastNameInput = document.getElementById('lastName');
-            const firstNameInput = document.getElementById('firstName');
-            const positionInput = document.getElementById('position');
+<!-- Модальное окно для начисления баллов -->
+<div class="modal" id="scoreModal">
+    <div class="modal-content">
+        <h3 id="modalEmployeeName">Начислить баллы</h3>
+        <div class="form-group">
+            <label>Выберите выполненное действие:</label>
+            <select id="taskSelect" class="modal-select">
+                <option value="10">Проведение собеседования (+10 б.)</option>
+                <option value="5">Помощь в собеседовании (+5 б.)</option>
+                <option value="15">Проведение лекции (+15 б.)</option>
+                <option value="15">Проведение экзамена (+15 б.)</option>
+                <option value="10">Принятие присяги (+10 б.)</option>
+                <option value="10">Провел экскурсию по УВД (+10 б.)</option>
+                <option value="20">Принял экзамен по практике задержания (+20 б.)</option>
+            </select>
+        </div>
+        <div class="modal-buttons">
+            <button class="btn btn-edit btn-small" onclick="closeModal()">Отмена</button>
+            <button class="btn btn-score-up btn-small" onclick="applyPoints()">Начислить</button>
+        </div>
+    </div>
+</div>
 
-            const lastName = lastNameInput.value.trim();
-            const firstName = firstNameInput.value.trim();
-            const position = positionInput.value.trim();
+<script>
+    // Массив сотрудников
+    let employees = [];
+    let currentEmployeeId = null;
 
-            if (!lastName || !firstName || !position) {
-                alert('Пожалуйста, заполните все поля!');
-                return;
-            }
+    // Справка по рангам для сортировки и названий
+    const rankConfig = {
+        'chief': { order: 1, text: 'Начальник', class: 'rank-chief' },
+        'deputy': { order: 2, text: 'Зам начальника', class: 'rank-deputy' },
+        'sr-instr': { order: 3, text: 'Старший инструктор', class: 'rank-sr-instr' },
+        'instr': { order: 4, text: 'Инструктор', class: 'rank-instr' },
+        'trainee': { order: 5, text: 'Стажер', class: 'rank-trainee' }
+    };
 
-            // Создаем объект нового сотрудника
-            const newEmployee = {
-                id: Date.now(),
-                lastName: lastName,
-                firstName: firstName,
-                position: position,
-                score: 0
-            };
+    // Функция добавления сотрудника
+    function addEmployee() {
+        const lastName = document.getElementById('lastName').value.trim();
+        const firstName = document.getElementById('firstName').value.trim();
+        const position = document.getElementById('position').value;
 
-            // Добавляем в массив и обновляем список на экране
-            employees.push(newEmployee);
-            renderEmployees();
-
-            // Очищаем поля ввода
-            lastNameInput.value = '';
-            firstNameInput.value = '';
-            positionInput.value = '';
+        if (!lastName || !firstName) {
+            alert('Пожалуйста, заполните Фамилию и Имя!');
+            return;
         }
 
-        // Функция изменения баллов (+ или -)
-        function changeScore(id, amount) {
-            const employee = employees.find(emp => emp.id === id);
-            if (employee) {
-                employee.score += amount;
-                renderEmployees();
-            }
-        }
+        const newEmployee = {
+            id: Date.now(),
+            lastName: lastName,
+            firstName: firstName,
+            position: position,
+            score: 0,
+            history: [],
+            isEditing: false
+        };
 
-        // Переключение карточки в режим редактирования
-        function toggleEdit(id) {
-            const card = document.getElementById(`card-${id}`);
-            const viewBlock = card.querySelector('.info-view');
-            const editBlock = card.querySelector('.info-edit');
-            const editBtn = card.querySelector('.btn-edit');
-            const saveBtn = card.querySelector('.btn-save');
+        employees.push(newEmployee);
+        
+        // Сброс формы
+        document.getElementById('lastName').value = '';
+        document.getElementById('firstName').value = '';
+        document.getElementById('position').value = 'chief';
 
-            if (viewBlock.style.display !== 'none') {
-                // Переходим в режим редактирования
-                viewBlock.style.display = 'none';
-                editBlock.style.display = 'flex';
-                editBtn.style.display = 'none';
-                saveBtn.style.display = 'block';
-            } else {
-                // Возвращаемся в режим просмотра без сохранения
-                viewBlock.style.display = 'block';
-                editBlock.style.display = 'none';
-                editBtn.style.display = 'block';
-                saveBtn.style.display = 'none';
-            }
-        }
+        updateUI();
+    }
 
-        // Сохранение отредактированных данных
-        function saveEmployee(id) {
-            const card = document.getElementById(`card-${id}`);
-            const newLastName = card.querySelector('.edit-lastname').value.trim();
-            const newFirstName = card.querySelector('.edit-firstname').value.trim();
-            const newPosition = card.querySelector('.edit-position').value.trim();
+    // Обновление интерфейса (сортировка + отрисовка)
+    function updateUI() {
+        const listContainer = document.getElementById('employeeList');
+        listContainer.innerHTML = '';
 
-            if (!newLastName || !newFirstName || !newPosition) {
-                alert('Поля не могут быть пустыми!');
-                return;
-            }
+        // Автоматическая сортировка по иерархии должностей
+        employees.sort((a, b) => rankConfig[a.position].order - rankConfig[b.position].order);
 
-            const employee = employees.find(emp => emp.id === id);
-            if (employee) {
-                employee.lastName = newLastName;
-                employee.firstName = newFirstName;
-                employee.position = newPosition;
-                renderEmployees();
-            }
-        }
+        employees.forEach(emp => {
+            const config = rankConfig[emp.position];
+            const card = document.createElement('div');
+            card.className = `employee-card ${config.class}`;
 
-        // Функция вывода списка сотрудников на экран
-        function renderEmployees() {
-            const listContainer = document.getElementById('employeeList');
-            listContainer.innerHTML = '';
-
-            if (employees.length === 0) {
-                listContainer.innerHTML = '<p style="text-align:center; color:var(--text-muted);">Сотрудники пока не добавлены.</p>';
-                return;
-            }
-
-            employees.forEach(emp => {
-                const card = document.createElement('div');
-                card.className = 'employee-card';
-                card.id = `card-${emp.id}`;
-
+            if (emp.isEditing) {
+                // Если карточка в режиме редактирования
                 card.innerHTML = `
-                    <!-- Информационный блок -->
-                    <div class="employee-info">
-                        <!-- Режим просмотра -->
-                        <div class="info-view">
-                            <h3>${emp.lastName} ${emp.firstName}</h3>
-                            <p>${emp.position}</p>
-                        </div>
-                        <!-- Режим редактирования (скрыт по умолчанию) -->
-                        <div class="info-edit">
-                            <input type="text" class="edit-lastname" value="${emp.lastName}" placeholder="Фамилия">
-                            <input type="text" class="edit-firstname" value="${emp.firstName}" placeholder="Имя">
-                            <input type="text" class="edit-position" value="${emp.position}" placeholder="Звание/Должность">
-                        </div>
+                    <div class="edit-fields">
+                        <input type="text" id="editLast-${emp.id}" value="${emp.lastName}" placeholder="Фамилия">
+                        <input type="text" id="editFirst-${emp.id}" value="${emp.firstName}" placeholder="Имя">
+                        <select id="editPos-${emp.id}">
+                            <option value="chief" ${emp.position === 'chief' ? 'selected' : ''}>Начальник</option>
+                            <option value="deputy" ${emp.position === 'deputy' ? 'selected' : ''}>Зам начальника</option>
+                            <option value="sr-instr" ${emp.position === 'sr-instr' ? 'selected' : ''}>Старший инструктор</option>
+                            <option value="instr" ${emp.position === 'instr' ? 'selected' : ''}>Инструктор</option>
+                            <option value="trainee" ${emp.position === 'trainee' ? 'selected' : ''}>Стажер</option>
+                        </select>
                     </div>
-
-                    <!-- Управление профилем (Редактировать / Сохранить) -->
-                    <div class="edit-buttons">
-                        <button class="btn-small btn-edit" onclick="toggleEdit(${emp.id})">Редактировать</button>
-                        <button class="btn-small btn-save" onclick="saveEmployee(${emp.id})">Сохранить</button>
-                    </div>
-
-                    <!-- Управление баллами -->
-                    <div class="score-section">
-                        <div class="score-badge">${emp.score}</div>
-                        <div class="score-buttons">
-                            <button class="btn-action btn-plus" onclick="changeScore(${emp.id}, 1)">+</button>
-                            <button class="btn-action btn-minus" onclick="changeScore(${emp.id}, -1)">−</button>
-                        </div>
+                    <div class="actions">
+                        <button class="btn btn-score-up btn-small" onclick="saveEdit(${emp.id})">💾 Сохранить</button>
+                        <button class="btn btn-edit btn-small" onclick="toggleEdit(${emp.id})">Отмена</button>
                     </div>
                 `;
+            } else {
+                // Обычный вид карточки
+                let historyHTML = '';
+                if (emp.history.length > 0) {
+                    historyHTML = `
+                        <div class="history-box">
+                            <div class="history-title">История баллов:</div>
+                            <ul class="history-list">
+                                ${emp.history.map(item => `<li>• ${item}</li>`).reverse().join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
 
-                listContainer.appendChild(card);
-            });
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="info-block">
+                            <h3>${emp.lastName} ${emp.firstName}</h3>
+                            <span class="rank-badge">${config.text}</span>
+                        </div>
+                        <div class="score-box">
+                            <span>Баллы:</span>
+                            <span class="score-count">${emp.score}</span>
+                        </div>
+                    </div>
+                    ${historyHTML}
+                    <div class="actions">
+                        <button class="btn btn-score-up btn-small" onclick="openScoreModal(${emp.id})">⭐ Начислить баллы</button>
+                        <button class="btn btn-score-down btn-small" onclick="finePoints(${emp.id})">⚠ Списать 5 б.</button>
+                        <button class="btn btn-edit btn-small" onclick="toggleEdit(${emp.id})">✏ Редактировать</button>
+                    </div>
+                `;
+            }
+
+            listContainer.appendChild(card);
+        });
+    }
+
+    // Функции редактирования
+    function toggleEdit(id) {
+        const emp = employees.find(e => e.id === id);
+        if (emp) {
+            emp.isEditing = !emp.isEditing;
+            updateUI();
         }
-    </script>
+    }
+
+    function saveEdit(id) {
+        const emp = employees.find(e => e.id === id);
+        if (emp) {
+            const newLast = document.getElementById(`editLast-${id}`).value.trim();
+            const newFirst = document.getElementById(`editFirst-${id}`).value.trim();
+            const newPos = document.getElementById(`editPos-${id}`).value;
+
+            if (!newLast || !newFirst) {
+                alert('Поля не должны быть пустыми!');
+                return;
+            }
+
+            emp.lastName = newLast;
+            emp.firstName = newFirst;
+            emp.position = newPos;
+            emp.isEditing = false;
+            updateUI();
+        }
+    }
+
+    // Управление модальным окном баллов
+    function openScoreModal(id) {
+        currentEmployeeId = id;
+        const emp = employees.find(e => e.id === id);
+        document.getElementById('modalEmployeeName').innerText = `Начисление: ${emp.lastName} ${emp.firstName}`;
+        document.getElementById('scoreModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('scoreModal').style.display = 'none';
+        currentEmployeeId = null;
+    }
+
+    function applyPoints() {
+        if (!currentEmployeeId) return;
+        
+        const emp = employees.find(e => e.id === currentEmployeeId);
+        const taskSelect = document.getElementById('taskSelect');
+        const selectedText = taskSelect.options[taskSelect.selectedIndex].text;
+        const points = parseInt(taskSelect.value) || 10;
+
+        if (emp) {
+            emp.score += points;
+            emp.history.push(`+${points} б. за: ${selectedText.replace(/\(\+\d+ б\.\)/, '')}`);
+            closeModal();
+            updateUI();
+        }
+    }
+
+    // Ручное быстрое списание (штраф)
+    function finePoints(id) {
+        const emp = employees.find(e => e.id === id);
+        if (emp) {
+            emp.score = Math.max(0, emp.score - 5);
+            emp.history.push(`-5 б. (Взыскание/Корректировка)`);
+            updateUI();
+        }
+    }
+</script>
+
 </body>
 </html>
