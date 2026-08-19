@@ -497,26 +497,25 @@
 </div>
 
 <script type="module">
+   // 1. Импорт нужных функций Firebase
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
   import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-  // 2. Подключение конкретно к вашей базе данных в Европе
+  // 2. Полные настройки подключения (взяты с вашего скриншота)
   const firebaseConfig = {
-    databaseURL: "https://orls2-b8461-default-rtdb.europe-west1.firebasedatabase.app"
+    apiKey: "AIzaSyDr0FgetThgpKmkZF_IQ7mp6IULB4TWGUs",
+    authDomain: "://firebaseapp.com",
+    databaseURL: "https://orls2-b8461-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "orls2-b8461",
+    storageBucket: "orls2-b8461.firebasestorage.app",
+    messagingSenderId: "957002084581",
+    appId: "1:957002084581:web:f696a3f73b4fce2f5a240c",
+    measurementId: "G-SB7XVK2H3J"
   };
 
-  // 3. Создание подключения
+  // 3. Создание подключения к базе данных
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
-
-
-  // --- Пример использования вашей БД ---
-  
-  // Функция для записи данных (например, в путь 'users/user1')
-  // set(ref(db, 'users/user1'), {
-  //   username: "Иван",
-  //   status: "активен"
-  // });
     let employees = [];
     let currentEmployeeId = null;
     let totalBudget = 30000000;
